@@ -260,6 +260,7 @@ namespace Laboratory1
             helpCallItem.Name = "helpCallItem";
             helpCallItem.Size = new Size(197, 26);
             helpCallItem.Text = "Вызов справки";
+            helpCallItem.Click += helpButton_Click;
             // 
             // helpAboutItem
             // 
@@ -369,8 +370,8 @@ namespace Laboratory1
             helpButton.ImageTransparentColor = Color.Magenta;
             helpButton.Name = "helpButton";
             helpButton.Size = new Size(54, 54);
-            helpButton.Text = "&Создать";
             helpButton.ToolTipText = "Вызов справки";
+            helpButton.Click += helpButton_Click;
             // 
             // aboutProgrammButton
             // 
@@ -379,7 +380,6 @@ namespace Laboratory1
             aboutProgrammButton.ImageTransparentColor = Color.Magenta;
             aboutProgrammButton.Name = "aboutProgrammButton";
             aboutProgrammButton.Size = new Size(54, 54);
-            aboutProgrammButton.Text = "&Открыть";
             aboutProgrammButton.ToolTipText = "О программе";
             aboutProgrammButton.Click += aboutProgrammButton_Click;
             // 
