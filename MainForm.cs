@@ -1,7 +1,7 @@
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
-namespace Laboratory1
+namespace Lab2
 {
     public partial class Compiler : Form
     {
@@ -41,7 +41,7 @@ namespace Laboratory1
 
             try
             {
-               //Создаем новый файл
+                //Создаем новый файл
                 File.Create(filename).Close();
                 fileInformationTextBox.Text = "";
 
@@ -83,7 +83,7 @@ namespace Laboratory1
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        
+
 
         private void fileOpenButton_Click(object sender, EventArgs e)
         {
@@ -110,25 +110,25 @@ namespace Laboratory1
                     }
                 }
 
-                
+
                 if (openDialog.ShowDialog() == DialogResult.Cancel)
                     return;
 
-               
-     filename = openDialog.FileName;
-     string fileText = File.ReadAllText(filename);
+
+                filename = openDialog.FileName;
+                string fileText = File.ReadAllText(filename);
 
 
-     redoStack.Clear();
-     undoStack.Clear();
+                redoStack.Clear();
+                undoStack.Clear();
 
 
-     undoStack.Push(fileText);
+                undoStack.Push(fileText);
 
 
-     isProgrammaticChange = true;
-     fileInformationTextBox.Text = fileText;
-     isProgrammaticChange = false;
+                isProgrammaticChange = true;
+                fileInformationTextBox.Text = fileText;
+                isProgrammaticChange = false;
             }
             catch (Exception ex)
             {
@@ -140,86 +140,86 @@ namespace Laboratory1
 
         private void saveAsButton_Click(object sender, EventArgs e)
         {
-           try
+            try
             {
                 saveDialog.Title = "Сохранить как";
-                
+
                 if (saveDialog.ShowDialog() == DialogResult.Cancel)
                     return;
-                    
+
                 filename = saveDialog.FileName;
                 File.WriteAllText(filename, fileInformationTextBox.Text);
-                
+
                 if (File.Exists(filename))
-                    MessageBox.Show("Файл успешно сохранен", "Сохранение", 
+                    MessageBox.Show("Файл успешно сохранен", "Сохранение",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                 else
-                    MessageBox.Show("Произошла ошибка при сохранении", "Ошибка", 
+                    MessageBox.Show("Произошла ошибка при сохранении", "Ошибка",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при сохранении файла: {ex.Message}", "Ошибка", 
+                MessageBox.Show($"Ошибка при сохранении файла: {ex.Message}", "Ошибка",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void exitButton_Click(object sender, EventArgs e)
         {
-            
-                // Проверяем наличие несохраненных изменений
-                if (!string.IsNullOrEmpty(filename) && File.Exists(filename))
-                {
-                    string currentContent = File.ReadAllText(filename);
-                    if (currentContent != fileInformationTextBox.Text)
-                    {
-                        DialogResult result = MessageBox.Show(
-                            "Последние изменения не были сохранены. Сохранить изменения перед выходом?",
-                            "Выход из приложения", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
 
-                        if (result == DialogResult.Yes)
-                        {
-                            File.WriteAllText(filename, fileInformationTextBox.Text);
-                            this.Close();
-                        }
-                        else if (result == DialogResult.No)
-                        {
-                            this.Close(); 
-                        }
+            // Проверяем наличие несохраненных изменений
+            if (!string.IsNullOrEmpty(filename) && File.Exists(filename))
+            {
+                string currentContent = File.ReadAllText(filename);
+                if (currentContent != fileInformationTextBox.Text)
+                {
+                    DialogResult result = MessageBox.Show(
+                        "Последние изменения не были сохранены. Сохранить изменения перед выходом?",
+                        "Выход из приложения", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+
+                    if (result == DialogResult.Yes)
+                    {
+                        File.WriteAllText(filename, fileInformationTextBox.Text);
+                        this.Close();
                     }
-                    else
+                    else if (result == DialogResult.No)
                     {
                         this.Close();
                     }
                 }
                 else
                 {
-                    this.Close(); 
+                    this.Close();
                 }
             }
-        
-        
+            else
+            {
+                this.Close();
+            }
+        }
+
+
 
         private void cutButton_Click(object sender, EventArgs e)
         {
-            
-                string selectedText = fileInformationTextBox.SelectedText;
 
-                if (!string.IsNullOrEmpty(selectedText))
+            string selectedText = fileInformationTextBox.SelectedText;
+
+            if (!string.IsNullOrEmpty(selectedText))
+            {
+                // Если есть выделенный текст - копируем его в буфер
+                Clipboard.SetText(selectedText);
+                fileInformationTextBox.SelectedText = "";
+            }
+            else
+            {
+                // Если нет выделения - копируем весь текст
+                if (!string.IsNullOrEmpty(fileInformationTextBox.Text))
                 {
-                    // Если есть выделенный текст - копируем его в буфер
-                    Clipboard.SetText(selectedText);
-                    fileInformationTextBox.SelectedText = ""; 
+                    Clipboard.SetText(fileInformationTextBox.Text);
+                    fileInformationTextBox.Text = "";
                 }
-                else
-                {
-                    // Если нет выделения - копируем весь текст
-                    if (!string.IsNullOrEmpty(fileInformationTextBox.Text))
-                    {
-                        Clipboard.SetText(fileInformationTextBox.Text);
-                        fileInformationTextBox.Text = ""; 
-                    }
-                }
+            }
         }
 
         private void copyButton_Click(object sender, EventArgs e)
@@ -239,7 +239,7 @@ namespace Laboratory1
 
         }
 
-        private void pastetButton_Click(object sender, EventArgs e)
+        private void pasteButton_Click(object sender, EventArgs e)
         {
             if (Clipboard.ContainsText())
                 fileInformationTextBox.SelectedText = Clipboard.GetText();
@@ -248,7 +248,7 @@ namespace Laboratory1
 
         private void selectAllButton_Click(object sender, EventArgs e)
         {
-           fileInformationTextBox.SelectAll();
+            fileInformationTextBox.SelectAll();
         }
 
         private void deleteButton_Click(object sender, EventArgs e)
@@ -301,6 +301,173 @@ namespace Laboratory1
 
 
         }
+
+        private void programmButton_Click(object sender, EventArgs e)
+        {
+            List<Token> tokens = Scanner.Analyze(fileInformationTextBox.Text);
+            dataGridView1.Rows.Clear();
+            foreach (var token in tokens)
+            {
+                dataGridView1.Rows.Add(token.Code, token.TypeColumn, token.Value, token.Position);
+            }
+        }
+
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            {
+               
+                DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
+
+                
+                if (row.Cells["TypeColumn"].Value != null)
+                {
+                    string value = row.Cells["TypeColumn"].Value.ToString();
+
+                    if (value == "Ошибка")
+                    {
+                       
+                        if (row.Cells["Position"].Value != null)
+                        {
+                            string position = row.Cells["Position"].Value.ToString();
+
+                           
+                            string errorValue = "";
+                            if (row.Cells["Value"].Value != null)
+                            {
+                                errorValue = row.Cells["Value"].Value.ToString();
+                            }
+                            MoveToErrorPosition(fileInformationTextBox, position, errorValue);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void MoveToErrorPosition(System.Windows.Forms.TextBox txtBox, string positionString, string errorValue)
+        {
+            if (txtBox == null || string.IsNullOrEmpty(positionString))
+                return;
+
+           
+                txtBox.HideSelection = false;
+
+              
+                int lineNumber = -1;
+                int startPos = -1;
+                int endPos = -1;
+
+               
+                string[] parts = positionString.Split(new[] { ' ', ',', '-' }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (string part in parts)
+                {
+                    if (part == "Строка")
+                        continue;
+
+                    if (int.TryParse(part, out int num))
+                    {
+                        if (lineNumber == -1)
+                            lineNumber = num;
+                        else if (startPos == -1)
+                            startPos = num;
+                        else if (endPos == -1)
+                            endPos = num;
+                    }
+                }
+
+              
+                if (lineNumber == -1)
+                {
+                    foreach (string part in parts)
+                    {
+                        if (int.TryParse(part, out int num))
+                        {
+                            lineNumber = num;
+                            break;
+                        }
+                    }
+                }
+
+                
+                if (lineNumber < 1 || lineNumber > txtBox.Lines.Length)
+                {
+                    Console.WriteLine($"Некорректный номер строки: {lineNumber}");
+                    return;
+                }
+
+               
+                int lineStartIndex = txtBox.GetFirstCharIndexFromLine(lineNumber - 1);
+
+                if (lineStartIndex >= 0)
+                {
+                    string lineText = txtBox.Lines[lineNumber - 1];
+
+                   
+                    if (startPos > 0)
+                    {
+                        
+                        int selectionStart = lineStartIndex + (startPos - 1);
+
+                        
+                        int selectionLength = 0;
+
+                        if (endPos > startPos)
+                        {
+                            selectionLength = endPos - startPos;
+                        }
+                        else if (!string.IsNullOrEmpty(errorValue))
+                        {
+                            string cleanValue = errorValue.Trim('"');
+                            selectionLength = cleanValue.Length;
+
+                            
+                            if (selectionStart + selectionLength > lineStartIndex + lineText.Length)
+                            {
+                                selectionLength = lineText.Length - (selectionStart - lineStartIndex);
+                            }
+                        }
+                        else
+                        {
+                            
+                            selectionLength = 1;
+                        }
+
+                    
+                        if (selectionStart >= 0 && selectionStart < txtBox.TextLength)
+                        {
+                            
+                            if (selectionStart + selectionLength > txtBox.TextLength)
+                            {
+                                selectionLength = txtBox.TextLength - selectionStart;
+                            }
+
+                          
+                            txtBox.SelectionStart = selectionStart;
+                            txtBox.SelectionLength = selectionLength;
+
+                        
+                            txtBox.ScrollToCaret();
+
+                            txtBox.Focus();
+
+
+                        }
+                    }
+                    else
+                    {
+                        // Если позиция не указана, выделяем всю строку
+                        txtBox.SelectionStart = lineStartIndex;
+                        txtBox.SelectionLength = lineText.Length;
+                        txtBox.ScrollToCaret();
+                        txtBox.Focus();
+
+
+                    }
+                }
+       
+        }
     }
 }
-

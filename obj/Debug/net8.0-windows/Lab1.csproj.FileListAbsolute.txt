@@ -36,8 +36,6 @@ C:\Users\Daria\source\repos\Laboratory1\Lab1\obj\Debug\net8.0-windows\refint\Lab
 C:\Users\Daria\source\repos\Laboratory1\Lab1\obj\Debug\net8.0-windows\Lab1.pdb
 C:\Users\Daria\source\repos\Laboratory1\Lab1\obj\Debug\net8.0-windows\Lab1.genruntimeconfig.cache
 C:\Users\Daria\source\repos\Laboratory1\Lab1\obj\Debug\net8.0-windows\ref\Lab1.dll
-C:\Users\Daria\source\repos\Lab1\Lab1\obj\Debug\net8.0-windows\Laboratory1.HelpForm.resources
-C:\Users\Daria\source\repos\Lab1\Lab1\obj\Debug\net8.0-windows\Laboratory1.Compiler.resources
 C:\Users\Daria\source\repos\Lab1\Lab1\obj\Debug\net8.0-windows\Lab1.Properties.Resources.resources
 C:\Users\Daria\source\repos\Lab1\Lab1\obj\Debug\net8.0-windows\Lab1.csproj.GenerateResource.cache
 C:\Users\Daria\source\repos\Lab1\Lab1\obj\Debug\net8.0-windows\Lab1.GeneratedMSBuildEditorConfig.editorconfig
@@ -48,3 +46,12 @@ C:\Users\Daria\source\repos\Lab1\Lab1\obj\Debug\net8.0-windows\Lab1.sourcelink.j
 C:\Users\Daria\source\repos\Lab1\Lab1\obj\Debug\net8.0-windows\Lab1.dll
 C:\Users\Daria\source\repos\Lab1\Lab1\obj\Debug\net8.0-windows\refint\Lab1.dll
 C:\Users\Daria\source\repos\Lab1\Lab1\obj\Debug\net8.0-windows\Lab1.pdb
+C:\Users\Daria\source\repos\Lab1\Lab1\obj\Debug\net8.0-windows\Lab1.HelpForm.resources
+C:\Users\Daria\source\repos\Lab1\Lab1\obj\Debug\net8.0-windows\Lab1.Compiler.resources
+C:\Users\Daria\source\repos\Lab1\Lab1\bin\Debug\net8.0-windows\Lab1.exe
+C:\Users\Daria\source\repos\Lab1\Lab1\bin\Debug\net8.0-windows\Lab1.deps.json
+C:\Users\Daria\source\repos\Lab1\Lab1\bin\Debug\net8.0-windows\Lab1.runtimeconfig.json
+C:\Users\Daria\source\repos\Lab1\Lab1\bin\Debug\net8.0-windows\Lab1.dll
+C:\Users\Daria\source\repos\Lab1\Lab1\bin\Debug\net8.0-windows\Lab1.pdb
+C:\Users\Daria\source\repos\Lab1\Lab1\obj\Debug\net8.0-windows\Lab1.genruntimeconfig.cache
+C:\Users\Daria\source\repos\Lab1\Lab1\obj\Debug\net8.0-windows\ref\Lab1.dll

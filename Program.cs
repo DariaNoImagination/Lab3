@@ -1,4 +1,4 @@
-namespace Laboratory1
+namespace Lab2
 {
     internal static class Program
     {
@@ -12,6 +12,8 @@ namespace Laboratory1
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             Application.Run(new Compiler());
+       
+
         }
     }
 }

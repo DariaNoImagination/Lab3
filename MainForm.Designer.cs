@@ -3,7 +3,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolBar;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
-namespace Laboratory1
+namespace Lab2
 {
     partial class Compiler
     {
@@ -77,13 +77,14 @@ namespace Laboratory1
             aboutProgrammButton = new ToolStripButton();
             splitContainer1 = new SplitContainer();
             fileInformationTextBox = new System.Windows.Forms.TextBox();
-            textBox2 = new System.Windows.Forms.TextBox();
+            dataGridView1 = new DataGridView();
             menuStrip.SuspendLayout();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
             // 
             // menuStrip
@@ -177,7 +178,7 @@ namespace Laboratory1
             editPasteItem.Name = "editPasteItem";
             editPasteItem.Size = new Size(186, 26);
             editPasteItem.Text = "Вставить";
-            editPasteItem.Click += pastetButton_Click;
+            editPasteItem.Click += pasteButton_Click;
             // 
             // editDeleteItem
             // 
@@ -247,6 +248,7 @@ namespace Laboratory1
             startBtn.Name = "startBtn";
             startBtn.Size = new Size(55, 24);
             startBtn.Text = "Пуск";
+            startBtn.Click += programmButton_Click;
             // 
             // helpBtn
             // 
@@ -354,7 +356,7 @@ namespace Laboratory1
             pasteButton.Name = "pasteButton";
             pasteButton.Size = new Size(54, 54);
             pasteButton.ToolTipText = "Вставить";
-            pasteButton.Click += pastetButton_Click;
+            pasteButton.Click += pasteButton_Click;
             // 
             // programmButton
             // 
@@ -362,6 +364,7 @@ namespace Laboratory1
             programmButton.Name = "programmButton";
             programmButton.Size = new Size(54, 54);
             programmButton.ToolTipText = "Пуск";
+            programmButton.Click += programmButton_Click;
             // 
             // helpButton
             // 
@@ -396,7 +399,7 @@ namespace Laboratory1
             // 
             // splitContainer1.Panel2
             // 
-            splitContainer1.Panel2.Controls.Add(textBox2);
+            splitContainer1.Panel2.Controls.Add(dataGridView1);
             splitContainer1.Size = new Size(887, 426);
             splitContainer1.SplitterDistance = 189;
             splitContainer1.TabIndex = 10;
@@ -413,17 +416,51 @@ namespace Laboratory1
             fileInformationTextBox.TabIndex = 8;
             fileInformationTextBox.TextChanged += fileInformationTextBox_TextChanged;
             // 
-            // textBox2
+            // dataGridView1
             // 
-            textBox2.Dock = DockStyle.Fill;
-            textBox2.Font = new Font("Segoe UI", 14F);
-            textBox2.Location = new Point(0, 0);
-            textBox2.Multiline = true;
-            textBox2.Name = "textBox2";
-            textBox2.ReadOnly = true;
-            textBox2.ScrollBars = ScrollBars.Both;
-            textBox2.Size = new Size(887, 233);
-            textBox2.TabIndex = 9;
+            dataGridView1.AllowUserToAddRows = false;
+            dataGridView1.AllowUserToDeleteRows = false;
+            dataGridView1.BackgroundColor = SystemColors.ButtonFace;
+            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Dock = DockStyle.Fill;
+            dataGridView1.Location = new Point(0, 0);
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.RowHeadersWidth = 51;
+            dataGridView1.Size = new Size(887, 233);
+            dataGridView1.TabIndex = 0;
+            dataGridView1.RowHeadersVisible = false;
+            dataGridView1.AutoGenerateColumns = false;
+            dataGridView1.CellContentClick += dataGridView1_CellContentClick;
+            DataGridViewTextBoxColumn Code = new DataGridViewTextBoxColumn();
+            Code.HeaderText = "Условный код";
+            Code.MinimumWidth = 6;
+            Code.Name = "Code";
+            Code.ReadOnly = true;
+            Code.Width = 220;
+
+            DataGridViewTextBoxColumn TypeColumn = new DataGridViewTextBoxColumn();
+            TypeColumn.HeaderText = "Тип лексемы";
+            TypeColumn.MinimumWidth = 6;
+            TypeColumn.Name = "TypeColumn";
+            TypeColumn.ReadOnly = true;
+            TypeColumn.Width = 200;
+
+            DataGridViewTextBoxColumn Value = new DataGridViewTextBoxColumn();
+            Value.HeaderText = "Лексема";
+            Value.MinimumWidth = 6;
+            Value.Name = "Value";
+            Value.ReadOnly = true;
+            Value.Width = 250;
+
+            DataGridViewTextBoxColumn Position = new DataGridViewTextBoxColumn();
+            Position.HeaderText = "Местоположение";
+            Position.MinimumWidth = 6;
+            Position.Name = "Position";
+            Position.ReadOnly = true;
+            Position.Width = 250;
+
+            // Добавляем колонки
+            dataGridView1.Columns.AddRange(new DataGridViewColumn[] { Code, TypeColumn, Value, Position });
             // 
             // Compiler
             // 
@@ -444,9 +481,9 @@ namespace Laboratory1
             splitContainer1.Panel1.ResumeLayout(false);
             splitContainer1.Panel1.PerformLayout();
             splitContainer1.Panel2.ResumeLayout(false);
-            splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -496,6 +533,10 @@ namespace Laboratory1
         private ToolStripMenuItem helpAboutItem;
         private SplitContainer splitContainer1;
         private System.Windows.Forms.TextBox fileInformationTextBox;
-        private System.Windows.Forms.TextBox textBox2;
+        private DataGridView dataGridView1;
+        private DataGridViewTextBoxColumn Code;
+        private DataGridViewTextBoxColumn TypeColumn;
+        private DataGridViewTextBoxColumn Value;
+        private DataGridViewTextBoxColumn Position;
     }
 }

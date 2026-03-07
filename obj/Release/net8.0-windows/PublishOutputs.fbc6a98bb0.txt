@@ -1,0 +1,5 @@
+C:\Users\Daria\source\repos\Lab1\Lab1\bin\Release\net8.0-windows\publish\Lab1.exe
+C:\Users\Daria\source\repos\Lab1\Lab1\bin\Release\net8.0-windows\publish\Lab1.dll
+C:\Users\Daria\source\repos\Lab1\Lab1\bin\Release\net8.0-windows\publish\Lab1.deps.json
+C:\Users\Daria\source\repos\Lab1\Lab1\bin\Release\net8.0-windows\publish\Lab1.runtimeconfig.json
+C:\Users\Daria\source\repos\Lab1\Lab1\bin\Release\net8.0-windows\publish\Lab1.pdb

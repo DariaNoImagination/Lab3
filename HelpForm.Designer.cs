@@ -1,4 +1,4 @@
-﻿namespace Laboratory1
+﻿namespace Lab2
 {
     partial class HelpForm
     {
