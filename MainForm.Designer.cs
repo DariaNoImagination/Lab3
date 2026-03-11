@@ -489,7 +489,7 @@ namespace Lab2
         }
 
         #endregion
-        private ToolStrip toolStrip;
+        
         private MenuStrip menuStrip;
         private ToolStrip toolStrip1;
         private ToolStripMenuItem fileBtn;
@@ -534,9 +534,6 @@ namespace Lab2
         private SplitContainer splitContainer1;
         private System.Windows.Forms.TextBox fileInformationTextBox;
         private DataGridView dataGridView1;
-        private DataGridViewTextBoxColumn Code;
-        private DataGridViewTextBoxColumn TypeColumn;
-        private DataGridViewTextBoxColumn Value;
-        private DataGridViewTextBoxColumn Position;
+        
     }
 }

@@ -5,14 +5,14 @@ using System.Text;
 namespace Lab2
 {
 
-    public partial class Token
+    public partial class Lexeme //Данные о лексеме
     {
         public string Code { get; set; }      
         public string TypeColumn { get; set; } 
         public string Value { get; set; }    
         public string Position { get; set; }   
 
-        public Token(string type, string code, string value, int line, int start, int end)
+        public Lexeme(string type, string code, string value, int line, int start, int end)
         {
             Code = code;
             TypeColumn = type;
@@ -25,42 +25,41 @@ namespace Lab2
         }
     }
 
-    static partial class Scanner
+    static partial class Scanner //Сканнер
     {
-        static public List<Token> Analyze(string text)
+        static public List<Lexeme> Analyze(string text)
         {
-            List<Token> tokens = new List<Token>(); 
+            List<Lexeme> lexemes = new List<Lexeme>(); 
 
-            int index = 0;
-            int str = 1; 
+            int index = 0; 
+            int str = 1; //Номер строки
             int positionInLine = 1; 
 
             
-            bool inString = false;             
-            bool inInterpolation = false;       
-            bool inInterpolationBrace = false;   
-            bool inCode = false;                 
-            StringBuilder stringContent = new StringBuilder(); 
+            bool inString = false;  // Находится ли в строке
+            bool inInterpolation = false;  // Находится ли в строке с интерполяцией
+            bool inInterpolationBrace = false;    // Находится ли в фигурных скобках интерполяции
+            StringBuilder stringContent = new StringBuilder(); // Строковое содержимое
             int stringStartPosition = 1;         
 
-            bool previousCharWasLetterOrDigit = false; 
-            bool previousCharWasSpace = false; 
+            bool previousCharLetterDigit = false; //Предыдущий символ строка или цифра
+            bool previousCharSpace = false; //Предыдущий символ пробел
 
             while (index < text.Length)
             {
                 char currentChar = text[index];
-                string token = "";
-                int tokenStartPos = positionInLine; 
+                string Lexeme = "";
+                int lexemeStartPos = positionInLine; 
 
 
                 if (currentChar == '\r' || currentChar == '\n')
                 {
-                    if (currentChar == '\n')
+                    if (currentChar == '\n') //При переходе на новую строку сбрасываем все значения
                     {
                         str++; 
                         positionInLine = 1; 
-                        previousCharWasLetterOrDigit = false;
-                        previousCharWasSpace = false;
+                        previousCharLetterDigit = false;
+                        previousCharSpace = false;
                     }
                     
                     index++;
@@ -68,7 +67,7 @@ namespace Lab2
                 }
 
               
-                if (currentChar == '\t')
+                if (currentChar == '\t') 
                 {
                     positionInLine += 4;
                     index++;
@@ -76,12 +75,12 @@ namespace Lab2
                 }
 
     
-                if (!inString && !inCode)
+                if (!inString && !inInterpolationBrace) //Вне строки и интерполяции
                 {
                    
                     if (currentChar == '"')
                     {
-                        tokens.Add(new Token(
+                        lexemes.Add(new Lexeme(
                             "Синтаксический знак",
                             "20",
                             "\"",
@@ -90,12 +89,12 @@ namespace Lab2
                             positionInLine
                         ));
 
-                        inString = true;
+                        inString = true; // Вход в строковое содержимое
                         stringContent.Clear();
                         stringStartPosition = positionInLine + 1;
 
-                        previousCharWasLetterOrDigit = false;
-                        previousCharWasSpace = false;
+                        previousCharLetterDigit = false;
+                        previousCharSpace = false;
                         positionInLine++;
                         index++;
                         continue;
@@ -105,9 +104,9 @@ namespace Lab2
                     if (currentChar == '$')
                     {
                        
-                        if (index + 1 < text.Length && text[index + 1] == '"')
+                        if (index + 1 < text.Length && text[index + 1] == '"') 
                         {
-                            tokens.Add(new Token(
+                            lexemes.Add(new Lexeme(
                                 "Символ интерполяции",
                                  "18",
                                 "$",
@@ -116,9 +115,9 @@ namespace Lab2
                                 positionInLine
                             ));
 
-                            inInterpolation = true;
-                            previousCharWasLetterOrDigit = false;
-                            previousCharWasSpace = false;
+                            inInterpolation = true; //Вход в интерполяцию
+                            previousCharLetterDigit = false;
+                            previousCharSpace = false;
                             positionInLine++;
                             index++;
                             continue;
@@ -131,7 +130,7 @@ namespace Lab2
                         
                         while (index < text.Length && char.IsDigit(text[index]))
                         {
-                            token += text[index];
+                            Lexeme += text[index];
                             index++;
                             positionInLine++;
                         }
@@ -141,53 +140,53 @@ namespace Lab2
                         {
                             if (index + 1 < text.Length && char.IsDigit(text[index + 1]))
                             {
-                                token += text[index]; 
+                                Lexeme += text[index]; 
                                 index++;
                                 positionInLine++;
 
                              
                                 while (index < text.Length && char.IsDigit(text[index]))
                                 {
-                                    token += text[index];
+                                    Lexeme += text[index];
                                     index++;
                                     positionInLine++;
                                 }
 
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                     "Число с плавающей точкой",
                                     "9",
-                                    token,
+                                    Lexeme,
                                     str,
-                                    tokenStartPos,
+                                    lexemeStartPos,
                                     positionInLine - 1
                                 ));
                             }
                             else
                             {
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                     "Целое число",
                                     "8",
-                                    token,
+                                    Lexeme,
                                     str,
-                                    tokenStartPos,
+                                    lexemeStartPos,
                                     positionInLine - 1
                                 ));
                             }
                         }
                         else
                         {
-                            tokens.Add(new Token(
+                            lexemes.Add(new Lexeme(
                                 "Целое число",
                                 "8",
-                                token,
+                                Lexeme,
                                 str,
-                                tokenStartPos,
+                                lexemeStartPos,
                                 positionInLine - 1
                             ));
                         }
 
-                        previousCharWasLetterOrDigit = true;
-                        previousCharWasSpace = false;
+                        previousCharLetterDigit = true;
+                        previousCharSpace = false;
                         continue;
                     }
 
@@ -196,87 +195,87 @@ namespace Lab2
                     {
                         while (index < text.Length && char.IsLetter(text[index]))
                         {
-                            token += text[index];
+                            Lexeme += text[index];
                             index++;
                             positionInLine++;
                         }
 
-                        switch (token)
+                        switch (Lexeme)
                         {
                             case "struct":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                    "Ключевое слово",
                                    "2",
-                                   token,
+                                   Lexeme,
                                    str,
-                                   tokenStartPos,
+                                   lexemeStartPos,
                                    positionInLine - 1
                                ));
                                 break;
                             case "public":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                    "Ключевое слово",
                                    "3",
-                                   token,
+                                   Lexeme,
                                    str,
-                                   tokenStartPos,
+                                   lexemeStartPos,
                                    positionInLine - 1
                                ));
                                 break;
                             case "string":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                    "Ключевое слово",
                                    "4",
-                                   token,
+                                   Lexeme,
                                    str,
-                                   tokenStartPos,
+                                   lexemeStartPos,
                                    positionInLine - 1
                                ));
                                 break;
                             case "int":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                    "Ключевое слово",
                                    "5",
-                                   token,
+                                   Lexeme,
                                    str,
-                                   tokenStartPos,
+                                   lexemeStartPos,
                                    positionInLine - 1
                                ));
                                 break;
                             case "void":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                    "Ключевое слово",
                                    "6",
-                                   token,
+                                   Lexeme,
                                    str,
-                                   tokenStartPos,
+                                   lexemeStartPos,
                                    positionInLine - 1
                                ));
                                 break;
                             case "this":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                    "Ключевое слово",
                                    "7",
-                                   token,
+                                   Lexeme,
                                    str,
-                                   tokenStartPos,
+                                   lexemeStartPos,
                                    positionInLine - 1
                                ));
                                 break;
                             default:
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                     "Идентификатор",
                                     "1",
-                                    token,
+                                    Lexeme,
                                     str,
-                                    tokenStartPos,
+                                    lexemeStartPos,
                                     positionInLine - 1
                                 ));
                                 break;
                         }
 
-                        previousCharWasLetterOrDigit = true;
-                        previousCharWasSpace = false;
+                        previousCharLetterDigit = true;
+                        previousCharSpace = false;
                         continue;
                     }
 
@@ -284,7 +283,7 @@ namespace Lab2
                     else if (currentChar == ' ')
                     {
                
-                        if (previousCharWasLetterOrDigit && !previousCharWasSpace)
+                        if (previousCharLetterDigit && !previousCharSpace)
                         {
                             int nextIndex = index + 1;
                             while (nextIndex < text.Length && (text[nextIndex] == ' ' || text[nextIndex] == '\t'))
@@ -294,7 +293,7 @@ namespace Lab2
 
                             if (nextIndex < text.Length && (char.IsLetterOrDigit(text[nextIndex]) || text[nextIndex] == '_'))
                             {
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                     "Разделитель (пробел)",
                                     "21",
                                     " ",
@@ -302,7 +301,7 @@ namespace Lab2
                                     positionInLine,
                                     positionInLine
                                 ));
-                                previousCharWasSpace = true;
+                                previousCharSpace = true;
                             }
                         }
 
@@ -316,94 +315,94 @@ namespace Lab2
                              currentChar == '=' || currentChar == '.' || currentChar == ',' ||
                              currentChar == ':' || currentChar == ')' || currentChar == '(')
                     {
-                        token = currentChar.ToString();
-                        switch (token)
+                        Lexeme = currentChar.ToString();
+                        switch (Lexeme)
                         {
                             case "{":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                 "Начало выражения",
                                 "10",
-                                token,
+                                Lexeme,
                                 str,
                                 positionInLine,
                                 positionInLine
                             ));
                                 break;
                             case "}":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                 "Конец выражения",
                                 "11",
-                                token,
+                                Lexeme,
                                 str,
                                 positionInLine,
                                 positionInLine
                             ));
                                 break;
                             case ";":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                 "Конец оператора",
                                 "12",
-                                token,
+                                Lexeme,
                                 str,
                                 positionInLine,
                                 positionInLine
                             ));
                                 break;
                             case "(":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                 "Начало перечисления аргументов",
                                 "13",
-                                token,
+                                Lexeme,
                                 str,
                                 positionInLine,
                                 positionInLine
                             ));
                                 break;
                             case ")":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                 "Конец перечисления аргументов",
                                 "14",
-                                token,
+                                Lexeme,
                                 str,
                                 positionInLine,
                                 positionInLine
                             ));
                                 break;
                             case "=":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                 "Оператор присваивания",
                                 "15",
-                                token,
+                                Lexeme,
                                 str,
                                 positionInLine,
                                 positionInLine
                             ));
                                 break;
                             case ".":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                 "Синтаксический знак",
                                 "16",
-                                token,
+                                Lexeme,
                                 str,
                                 positionInLine,
                                 positionInLine
                             ));
                                 break;
                             case ",":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                 "Синтаксический знак",
                                 "17",
-                                token,
+                                Lexeme,
                                 str,
                                 positionInLine,
                                 positionInLine
                             ));
                                 break;
                             case ":":
-                                tokens.Add(new Token(
+                                lexemes.Add(new Lexeme(
                                 "Синтаксический знак",
                                 "19",
-                                token,
+                                Lexeme,
                                 str,
                                 positionInLine,
                                 positionInLine
@@ -419,16 +418,16 @@ namespace Lab2
   
                     else
                     {
-                        tokens.Add(new Token(
+                        lexemes.Add(new Lexeme(
                             "Ошибка",
-                            "21",
+                            "22",
                             currentChar.ToString(),
                             str,
                             positionInLine,
                             positionInLine
                         ));
-                        previousCharWasLetterOrDigit = false;
-                        previousCharWasSpace = false;
+                        previousCharLetterDigit = false;
+                        previousCharSpace = false;
                         positionInLine++;
                         index++;
                         continue;
@@ -436,15 +435,15 @@ namespace Lab2
                 }
 
             
-                else if (inString && !inCode)
+                else if (inString && !inInterpolationBrace) //Обработка в строке 
                 {
                   
-                    if (currentChar == '"')
+                    if (currentChar == '"') //Закрытие строки
                     {
                   
                         if (stringContent.Length > 0)
                         {
-                            tokens.Add(new Token(
+                            lexemes.Add(new Lexeme(
                                 "Строковое содержимое",
                                 "0",
                                 $"\"{stringContent}\"",
@@ -456,7 +455,7 @@ namespace Lab2
                         }
 
                        
-                        tokens.Add(new Token(
+                        lexemes.Add(new Lexeme(
                             "Синтаксический знак",
                              "20",
                             "\"",
@@ -474,12 +473,12 @@ namespace Lab2
                         continue;
                     }
 
-                    if (inInterpolation && currentChar == '{')
+                    if (inInterpolation && currentChar == '{') //Обработка начала интерполяции
                     {
                         
                         if (stringContent.Length > 0)
                         {
-                            tokens.Add(new Token(
+                            lexemes.Add(new Lexeme(
                                 "Строковое содержимое",
                                 "0",
                                  $"\"{stringContent}\"",
@@ -491,7 +490,7 @@ namespace Lab2
                         }
 
                        
-                        tokens.Add(new Token(
+                        lexemes.Add(new Lexeme(
                             "Начало выражения интерполяции",
                             "10",
                             "{",
@@ -503,7 +502,7 @@ namespace Lab2
                        
                         inInterpolationBrace = true;
                         inString = false;  
-                        inCode = true;      
+                        
 
                         positionInLine++;
                         index++;
@@ -517,13 +516,13 @@ namespace Lab2
                 }
 
               
-                else if (inCode && inInterpolationBrace)
+                else if (inInterpolationBrace) //Обработка внутри интерполяции
                 {
                     
                     if (currentChar == '}')
                     {
                        
-                        tokens.Add(new Token(
+                        lexemes.Add(new Lexeme(
                             "Конец выражения интерполяции",
                             "11",
                             "}",
@@ -534,7 +533,6 @@ namespace Lab2
 
                         
                         inInterpolationBrace = false;
-                        inCode = false;
                         inString = true;  
                         stringStartPosition = positionInLine + 1; 
 
@@ -556,7 +554,7 @@ namespace Lab2
                             positionInLine++;
                         }
 
-                        tokens.Add(new Token(
+                        lexemes.Add(new Lexeme(
                             "Идентификатор",
                             "1",
                             codeToken.ToString(),
@@ -581,7 +579,7 @@ namespace Lab2
                             positionInLine++;
                         }
 
-                        tokens.Add(new Token(
+                        lexemes.Add(new Lexeme(
                             "Целое число",
                             "8",
                             numberToken.ToString(),
@@ -610,7 +608,7 @@ namespace Lab2
                             case ';': tokenType = "Конец оператора"; tokenCode = "12"; break;
                         }
 
-                        tokens.Add(new Token(
+                        lexemes.Add(new Lexeme(
                             tokenType,
                             tokenCode,
                             currentChar.ToString(),
@@ -639,7 +637,7 @@ namespace Lab2
                 else
                 {
                    
-                    tokens.Add(new Token(
+                    lexemes.Add(new Lexeme(
                         "Ошибка",
                         "22",
                         currentChar.ToString(),
@@ -647,14 +645,14 @@ namespace Lab2
                         positionInLine,
                         positionInLine
                     ));
-                    previousCharWasLetterOrDigit = false;
-                    previousCharWasSpace = false;
+                    previousCharLetterDigit = false;
+                    previousCharSpace = false;
                     positionInLine++;
                     index++;
                 }
             }
 
-            return tokens;
+            return lexemes;
         }
     }
 }
