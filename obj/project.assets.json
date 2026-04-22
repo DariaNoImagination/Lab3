@@ -14,9 +14,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Daria\\source\\repos\\Lab2\\Lab2\\Lab2.csproj",
-      "projectName": "Lab2",
-      "projectPath": "C:\\Users\\Daria\\source\\repos\\Lab2\\Lab2\\Lab2.csproj",
+      "projectUniqueName": "C:\\Users\\Daria\\source\\repos\\Lab2\\Lab2\\Lab3.csproj",
+      "projectName": "Lab3",
+      "projectPath": "C:\\Users\\Daria\\source\\repos\\Lab2\\Lab2\\Lab3.csproj",
       "packagesPath": "C:\\Users\\Daria\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\Daria\\source\\repos\\Lab2\\Lab2\\obj\\",
       "projectStyle": "PackageReference",

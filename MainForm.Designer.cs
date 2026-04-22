@@ -78,6 +78,10 @@ namespace Lab2
             splitContainer1 = new SplitContainer();
             fileInformationTextBox = new System.Windows.Forms.TextBox();
             dataGridView1 = new DataGridView();
+            InvalidFragmentColumn = new DataGridViewTextBoxColumn();
+            Position = new DataGridViewTextBoxColumn();
+            Description = new DataGridViewTextBoxColumn();
+            Code = new DataGridViewTextBoxColumn();
             menuStrip.SuspendLayout();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
@@ -422,46 +426,42 @@ namespace Lab2
             dataGridView1.AllowUserToDeleteRows = false;
             dataGridView1.BackgroundColor = SystemColors.ButtonFace;
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Columns.AddRange(new DataGridViewColumn[] { InvalidFragmentColumn, Position, Description });
             dataGridView1.Dock = DockStyle.Fill;
             dataGridView1.Location = new Point(0, 0);
             dataGridView1.Name = "dataGridView1";
+            dataGridView1.RowHeadersVisible = false;
             dataGridView1.RowHeadersWidth = 51;
             dataGridView1.Size = new Size(887, 233);
             dataGridView1.TabIndex = 0;
-            dataGridView1.RowHeadersVisible = false;
-            dataGridView1.AutoGenerateColumns = false;
             dataGridView1.CellContentClick += dataGridView1_CellContentClick;
-            DataGridViewTextBoxColumn Code = new DataGridViewTextBoxColumn();
-            Code.HeaderText = "Условный код";
-            Code.MinimumWidth = 6;
-            Code.Name = "Code";
-            Code.ReadOnly = true;
-            Code.Width = 220;
-
-            DataGridViewTextBoxColumn TypeColumn = new DataGridViewTextBoxColumn();
-            TypeColumn.HeaderText = "Тип лексемы";
-            TypeColumn.MinimumWidth = 6;
-            TypeColumn.Name = "TypeColumn";
-            TypeColumn.ReadOnly = true;
-            TypeColumn.Width = 200;
-
-            DataGridViewTextBoxColumn Value = new DataGridViewTextBoxColumn();
-            Value.HeaderText = "Лексема";
-            Value.MinimumWidth = 6;
-            Value.Name = "Value";
-            Value.ReadOnly = true;
-            Value.Width = 250;
-
-            DataGridViewTextBoxColumn Position = new DataGridViewTextBoxColumn();
+            // 
+            // InvalidFragmentColumn
+            // 
+            InvalidFragmentColumn.HeaderText = "Неверный фрагмент";
+            InvalidFragmentColumn.MinimumWidth = 6;
+            InvalidFragmentColumn.Name = "InvalidFragmentColumn";
+            InvalidFragmentColumn.ReadOnly = true;
+            InvalidFragmentColumn.Width = 280;
+            // 
+            // Position
+            // 
             Position.HeaderText = "Местоположение";
             Position.MinimumWidth = 6;
             Position.Name = "Position";
             Position.ReadOnly = true;
-            Position.Width = 250;
-
-            // Добавляем колонки
-            dataGridView1.Columns.AddRange(new DataGridViewColumn[] { Code, TypeColumn, Value, Position });
+            Position.Width = 280;
             // 
+            // Description
+            // 
+            Description.HeaderText = "Описание";
+            Description.MinimumWidth = 6;
+            Description.Name = "Description";
+            Description.ReadOnly = true;
+            Description.Width = 300;
+            // 
+           
+        
             // Compiler
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -474,6 +474,7 @@ namespace Lab2
             MinimumSize = new Size(600, 400);
             Name = "Compiler";
             Text = "Compiler";
+            Load += Compiler_Load;
             menuStrip.ResumeLayout(false);
             menuStrip.PerformLayout();
             toolStrip1.ResumeLayout(false);
@@ -489,7 +490,7 @@ namespace Lab2
         }
 
         #endregion
-        
+
         private MenuStrip menuStrip;
         private ToolStrip toolStrip1;
         private ToolStripMenuItem fileBtn;
@@ -534,6 +535,9 @@ namespace Lab2
         private SplitContainer splitContainer1;
         private System.Windows.Forms.TextBox fileInformationTextBox;
         private DataGridView dataGridView1;
-        
+        private DataGridViewTextBoxColumn InvalidFragmentColumn;
+        private DataGridViewTextBoxColumn Position;
+        private DataGridViewTextBoxColumn Description;
+        private DataGridViewTextBoxColumn Code;
     }
 }

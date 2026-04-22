@@ -1,3 +1,4 @@
+
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
@@ -304,42 +305,51 @@ namespace Lab2
 
         private void programmButton_Click(object sender, EventArgs e)
         {
-            List<Lexeme> lexemes = Scanner.Analyze(fileInformationTextBox.Text);
-            dataGridView1.Rows.Clear();
-            foreach (var lexeme in lexemes)
-            {
-                dataGridView1.Rows.Add(lexeme.Code, lexeme.TypeColumn, lexeme.Value, lexeme.Position);
-            }
-        }
+            // Создаём парсер и получаем список ошибок
+            Parser parser = new Parser(fileInformationTextBox.Text);
+            List<Error> errors = parser.Parse();
 
+            dataGridView1.Rows.Clear();
+
+
+            foreach (var error in errors)
+            {
+                dataGridView1.Rows.Add(
+                    error.InvalidFragment,
+                    error.Position,
+                    error.Description
+                );
+            }
+
+
+           dataGridView1.Rows.Add(
+                    "Количество ошибок: ",
+                    errors.Count,
+                    "-"
+                );
+        }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            
             if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
             {
-               
                 DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
 
-                
-                if (row.Cells["TypeColumn"].Value != null)
+                // Проверяем, что это не строка с количеством ошибок
+                if (row.Cells["Description"] != null && row.Cells["Description"].Value != null)
                 {
-                    string? value = row.Cells["TypeColumn"].Value.ToString();
+                    string? description = row.Cells["Description"].Value.ToString();
 
-                    if (value == "Ошибка")
+                    // Проверяем, что это ошибка 
+                    if (description != "-" && !description.Contains("Количество"))
                     {
-                       
-                        if (row.Cells["Position"].Value != null)
+                        if (row.Cells["Position"] != null && row.Cells["Position"].Value != null)
                         {
                             string? position = row.Cells["Position"].Value.ToString();
+                            string? invalidFragment = row.Cells["InvalidFragmentColumn"]?.Value?.ToString();
 
-                           
-                            string? errorValue = "";
-                            if (row.Cells["Value"].Value != null)
-                            {
-                                errorValue = row.Cells["Value"].Value.ToString();
-                            }
-                            MoveToErrorPosition(fileInformationTextBox, position, errorValue);
+                            // Перемещаем курсор к месту ошибки
+                            MoveToErrorPosition(fileInformationTextBox, position, invalidFragment);
                         }
                     }
                 }
@@ -351,97 +361,102 @@ namespace Lab2
             if (txtBox == null || string.IsNullOrEmpty(positionString))
                 return;
 
-           
-              
-                int lineNumber = -1; 
-                int startPos = -1; 
-                int endPos = -1;
 
-               
-                string[] parts = positionString.Split(new[] { ' ', ',', '-' }, StringSplitOptions.RemoveEmptyEntries); //Разделение строки на части 
 
-                foreach (string part in parts)
+            int lineNumber = -1;
+            int startPos = -1;
+            int endPos = -1;
+
+
+            string[] parts = positionString.Split(new[] { ' ', ',', '-' }, StringSplitOptions.RemoveEmptyEntries); //Разделение строки на части 
+
+            foreach (string part in parts)
+            {
+                if (part == "Строка")
+                    continue;
+
+                if (int.TryParse(part, out int num)) //Получаем номер строки и индексы начала и конца лексемы из строки "Местоположение"
                 {
-                    if (part == "Строка") 
-                        continue;
-
-                    if (int.TryParse(part, out int num)) //Получаем номер строки и индексы начала и конца лексемы из строки "Местоположение"
-                    {
-                        if (lineNumber == -1)
-                            lineNumber = num;
-                        else if (startPos == -1)
-                            startPos = num;
-                        else if (endPos == -1)
-                            endPos = num+1;
-                    }
+                    if (lineNumber == -1)
+                        lineNumber = num;
+                    else if (startPos == -1)
+                        startPos = num;
+                    else if (endPos == -1)
+                        endPos = num + 1;
                 }
+            }
 
-                
-                if (lineNumber < 1 || lineNumber > txtBox.Lines.Length)
+
+            if (lineNumber < 1 || lineNumber > txtBox.Lines.Length)
+            {
+                Console.WriteLine($"Некорректный номер строки: {lineNumber}");
+                return;
+            }
+
+
+            int lineStartIndex = txtBox.GetFirstCharIndexFromLine(lineNumber - 1); //Получаем индекс первого символа строки
+
+            if (lineStartIndex >= 0)
+            {
+                string lineText = txtBox.Lines[lineNumber - 1]; //Получем текст строки
+
+
+                if (startPos > 0)
                 {
-                    Console.WriteLine($"Некорректный номер строки: {lineNumber}");
-                    return;
-                }
 
-               
-                int lineStartIndex = txtBox.GetFirstCharIndexFromLine(lineNumber - 1); //Получаем индекс первого символа строки
+                    int selectionStart = lineStartIndex + (startPos - 1);  //Позиция начала выделения текста
 
-                if (lineStartIndex >= 0)
-                {
-                    string lineText = txtBox.Lines[lineNumber - 1]; //Получем текст строки
 
-                   
-                    if (startPos > 0)
+                    int selectionLength = 0;
+
+                    if (endPos > startPos)
                     {
-                        
-                        int selectionStart = lineStartIndex + (startPos - 1);  //Позиция начала выделения текста
-
-                        
-                        int selectionLength = 0;
-
-                        if (endPos > startPos)
-                        {
-                            selectionLength = endPos - startPos; //Длина выделенного текста
-                        }
-                        else 
-                        {
-                            
-                            selectionLength = 1;
-                        }
-
-                    
-                        if (selectionStart >= 0 && selectionStart < txtBox.TextLength)
-                        {
-                            
-                            if (selectionStart + selectionLength > txtBox.TextLength)
-                            {
-                                selectionLength = txtBox.TextLength - selectionStart;  //Если выделение выходит за пределы текста,обрезаем его
-                            }
-
-                          
-                            txtBox.SelectionStart = selectionStart; //Установка выделения
-                            txtBox.SelectionLength = selectionLength;
-
-                        
-                            txtBox.ScrollToCaret(); //Прокрутка к выделенному тексту
-
-                            txtBox.Focus();
-
-
-                        }
+                        selectionLength = endPos - startPos; //Длина выделенного текста
                     }
-                    else //Если startPos некорректный, выделяем всю строку
+                    else
                     {
-                       
-                        txtBox.SelectionStart = lineStartIndex;
-                        txtBox.SelectionLength = lineText.Length;
-                        txtBox.ScrollToCaret();
+
+                        selectionLength = 1;
+                    }
+
+
+                    if (selectionStart >= 0 && selectionStart < txtBox.TextLength)
+                    {
+
+                        if (selectionStart + selectionLength > txtBox.TextLength)
+                        {
+                            selectionLength = txtBox.TextLength - selectionStart;  //Если выделение выходит за пределы текста,обрезаем его
+                        }
+
+
+                        txtBox.SelectionStart = selectionStart; //Установка выделения
+                        txtBox.SelectionLength = selectionLength;
+
+
+                        txtBox.ScrollToCaret(); //Прокрутка к выделенному тексту
+
                         txtBox.Focus();
 
 
                     }
                 }
-       
+                else //Если startPos некорректный, выделяем всю строку
+                {
+
+                    txtBox.SelectionStart = lineStartIndex;
+                    txtBox.SelectionLength = lineText.Length;
+                    txtBox.ScrollToCaret();
+                    txtBox.Focus();
+
+
+                }
+            }
+
+        }
+
+        private void Compiler_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
