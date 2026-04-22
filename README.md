@@ -111,12 +111,22 @@ A → aB, где A, B ∈ N (нетерминальные символы), a ∈
 ## Граф автоматной грамматики
 <p align="center">
   <img width="1600" height="650" alt="Граф автоматной грамматики"  src="https://github.com/user-attachments/assets/39da4e3b-1bdf-46fb-ad72-d81c6903516f" />
-
+ <em>Недетерминированный граф автоматной грамматики</em>
 </p>
 <p align="center">
-  <em>Граф автоматной грамматики</em>
+  <img width="1200" height="700" alt="Граф автоматной грамматики" src="https://github.com/user-attachments/assets/953301ff-2aff-41c0-80a8-c42f1afcd303" /></p>
+<p align="center">
+
+  <em>Детерминированный граф автоматной грамматики</em>
 </p>
 
+* `q0` = `<START>`
+* `q1` = `<ID>`
+* `q2` = `<COMMA>`, `<E>`, `<OpCurlyBrace>`
+* `q3`, `q4` = `<P>`, `<CloseCurlyBrace>`
+* `q5` = `<TYPE>`
+* `q6` = `<COMMA>`, `<E>`
+* `q7` = `<END>`
 
 ## Тестовые примеры
 
