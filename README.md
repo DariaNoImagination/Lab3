@@ -116,7 +116,6 @@ A → aB, где A, B ∈ N (нетерминальные символы), a ∈
 <p align="center">
   <img width="1200" height="700" alt="Граф автоматной грамматики" src="https://github.com/user-attachments/assets/953301ff-2aff-41c0-80a8-c42f1afcd303" /></p>
 <p align="center">
-
   <em>Детерминированный граф автоматной грамматики</em>
 </p>
 
