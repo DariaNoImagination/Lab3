@@ -112,7 +112,6 @@ A → aB, где A, B ∈ N (нетерминальные символы), a ∈
 <p align="center">
   <img width="1600" height="650" alt="Граф автоматной грамматики"  src="https://github.com/user-attachments/assets/39da4e3b-1bdf-46fb-ad72-d81c6903516f" />
 
-/>
 </p>
 <p align="center">
   <em>Граф автоматной грамматики</em>
@@ -148,7 +147,7 @@ A → aB, где A, B ∈ N (нетерминальные символы), a ∈
 <img width="1300" height="800" src="https://github.com/user-attachments/assets/5fc37550-22e9-450e-b3aa-2c6c04d44251" />
 </p>
 <p align="center">
-<img width="1300" height="800" src="https://github.com/user-attachments/assets/89f8b4b3-85a3-4126-baf1-3ff3d4293560" />
+<img width="1300" height="800" src="https://github.com/user-attachments/assets/9de965b5-b97e-47d3-824a-d54fc2982d65" />
 </p>
 
 
