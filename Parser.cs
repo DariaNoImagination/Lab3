@@ -100,6 +100,12 @@ namespace Lab2
 
             if (_tokens.Count == 0)
             {
+
+
+                AddError("начало файла", "Строка 1, 0",
+             "Строка должна начинаться с ключевого слова 'struct'",
+             "'struct'", "начало файла");
+
                 return _errors;
             }
 
@@ -148,6 +154,7 @@ namespace Lab2
         {
             if (!_errors.Any(e => e.Position == position && e.Description == description))
             {
+                
                 _errors.Add(new Error(invalidFragment, position, description, expected, found));
             }
         }
@@ -219,9 +226,11 @@ namespace Lab2
 
         private ParserState ConsumeExpectedToken(ParserState state)
         {
+            
             switch (state)
             {
                 case ParserState.ExpectStruct:
+
                     if (_current != null && _current.Code == CODE.STRUCT)
                     {
                         GetNextToken();
@@ -234,6 +243,7 @@ namespace Lab2
                  
                         return ParserState.ExpectIdentifier;
                     }
+                    
                     else
                     {
                         AddError(_current?.Value ?? "конец файла", GetPosition(_current), "Строка должна начинаться с ключевого слова 'struct'", "'struct'", _current?.Value ?? "конец файла");
@@ -286,6 +296,7 @@ namespace Lab2
                     }
 
                 case ParserState.ExpectType:
+
                     if (_current != null && _current.Code == CODE.TYPE_ID)
                     {
                         GetNextToken();
@@ -293,7 +304,7 @@ namespace Lab2
                     }
                     else if (_current != null && _current.Code == CODE.IDENTIFIER)
                     {
-                        // Идентификатор без типа - ошибка
+                        
                         AddError(_current.Value, GetPosition(_current), "После 'public' ожидается тип с именем поля", "тип (int, float, string) с именем поля", _current.Value);
                         GetNextToken();
                         return ParserState.ExpectSemicolonOrComma;
@@ -306,22 +317,56 @@ namespace Lab2
                     }
 
                 case ParserState.ExpectSemicolonOrComma:
+                    while (_current != null && _current.Code == CODE.SPACE)
+                        GetNextToken();
+
                     if (_current != null && _current.Code == CODE.END)
                     {
                         GetNextToken();
-                        return ParserState.ExpectPublic;  
+                        while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
+                        return ParserState.ExpectPublic;
                     }
                     else if (_current != null && _current.Code == CODE.COMMA)
                     {
                         GetNextToken();
-                        return ParserState.ExpectFieldName;  
+                        if (_current != null && _current.Code == CODE.IDENTIFIER)
+                        {
+                            return ParserState.ExpectFieldName;
+                        }
+                        else
+                        {
+                            AddError(_current?.Value ?? "конец файла", GetPosition(_current),
+                                "После ',' ожидается имя поля",
+                                "идентификатор", _current?.Value ?? "конец файла");
+                            return ParserState.ExpectSemicolonOrComma;
+                        }
                     }
                     else if (_current != null && _current.Code == CODE.IDENTIFIER)
                     {
-                        
                         AddError(_current.Value, GetPosition(_current), "Ожидается ';' или ','", "';' или ','", _current.Value);
                         GetNextToken();
+                        while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
                         return ParserState.ExpectSemicolonOrComma;
+                    }
+                    else if (_current != null && _current.Code == CODE.CLOSECURLYBRACE)
+                    {
+                        return ParserState.ExpectCloseCurlyBrace;
+                    }
+                    else if (_current != null && _current.Code == CODE.PUBLIC)
+                    {
+                        AddError(_current.Value, GetPosition(_current),
+                            "Ожидается ';' '",
+                            "';'", _current.Value);
+                        return ParserState.ExpectPublic;
+                    }
+                    else if (_current != null && _current.Code == CODE.TYPE_ID)
+                    {
+                        AddError(_current.Value, GetPosition(_current),
+                            "Ожидается';' или ','",
+                            "';' или ','", _current.Value);
+                        return ParserState.ExpectType;
                     }
                     else
                     {
@@ -331,8 +376,30 @@ namespace Lab2
                     }
 
                 case ParserState.ExpectFieldName:
-                    GetNextToken();
-                    return ParserState.ExpectSemicolonOrComma;
+                    if (_current != null && _current.Code == CODE.IDENTIFIER)
+                    {
+                        GetNextToken();
+                        while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
+                        return ParserState.ExpectSemicolonOrComma;
+                    }
+                    else if (_current != null && _current.Code == CODE.TYPE_ID)
+                    {
+                        
+                        AddError(_current.Value, GetPosition(_current),
+                            "Ожидается имя поля",
+                            "идентификатор", _current.Value);
+                       
+                        return ParserState.ExpectType;
+                    }
+                    else
+                    {
+                        AddError(_current?.Value ?? "конец файла", GetPosition(_current),
+                            "Ожидается имя поля",
+                            "идентификатор", _current?.Value ?? "конец файла");
+                        GetNextToken();
+                        return ParserState.ExpectSemicolonOrComma;
+                    }
 
                 case ParserState.ExpectSemicolon:
                     if (_current != null && _current.Code == CODE.END)
@@ -371,18 +438,131 @@ namespace Lab2
         private bool Recover(ref ParserState state)
         {
             int startPos = _pos;
-
+            int lastFragments = 0;
             switch (state)
             {
                 case ParserState.ExpectStruct:
-                    SkipUntil(CODE.STRUCT, CODE.IDENTIFIER);
-                    if (_current != null && _current.Code == CODE.STRUCT)
-                        state = ParserState.ExpectStruct;
-                    else if (_current != null && _current.Code == CODE.IDENTIFIER)
+                    bool hasStructNearby = false;
+                    int checkPos = _pos - 1;
+
+
+
+                    for (int i = 0; i < 10 && checkPos + i < _tokens.Count; i++)
+                    {
+                        Token t = _tokens[checkPos + i];
+
+                        if (t.Code == CODE.STRUCT ||
+                            (t.Code == CODE.IDENTIFIER && t.Value.ToLower() == "struct") ||
+                            (t.Code == CODE.IDENTIFIER && (t.Value.ToLower() == "str" || t.Value.ToLower() == "stru" || t.Value.ToLower() == "st" || t.Value.ToLower() == "s")))
+                        {
+                            hasStructNearby = true;
+                            break;
+                        }
+                    }
+
+
+                    if (!hasStructNearby)
+                    {
+                        GetNextToken();
+                        if (_current == null)
+                        {   
+                            state = ParserState.Accept;
+                            break;
+                        }
+
                         state = ParserState.ExpectOpenCurlyBrace;
-                    else
-                        return false;
+                        break;
+                       
+                    }
+
+                    bool foundStruct = false;
+                    startPos = _pos - 1;
+
+
+                    for (int i = 0; i < 5 && startPos + i < _tokens.Count; i++)
+                    {
+                        Token token = _tokens[startPos + i];
+                        if (token.Code == CODE.STRUCT)
+                        {
+
+
+                            for (int j = 0; j <= i; j++)
+                                GetNextToken();
+
+                            if (_current == null)
+                            {
+                                state = ParserState.Accept;
+                                break;
+                            }
+                            state = ParserState.ExpectIdentifier;
+                            break;
+                        }
+                        else if (token.Code == CODE.IDENTIFIER || token.Code == CODE.ERROR)
+                        {
+
+                            string combined = "";
+                            List<Token> fragments = new List<Token>();
+
+                            for (int k = 0; k <= i && startPos + k < _tokens.Count; k++)
+                            {
+                                Token t = _tokens[startPos + k];
+                                if (t.Code == CODE.IDENTIFIER || t.Code == CODE.ERROR)
+                                {
+                                    fragments.Add(t);
+                                    combined += t.Value;
+                                }
+                                else if (t.Code == CODE.SPACE)
+                                {
+                                    continue;
+                                }
+                                
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            lastFragments = fragments.Count();
+                            string cleaned = new string(combined.Where(c => char.IsLetter(c)).ToArray());
+                            if (cleaned.ToLower() == "struct")
+                            {
+                                foundStruct = true;
+                                
+
+                                for (int j = 0; j < fragments.Count; j++)
+                                    GetNextToken();
+
+
+                                while (_current != null && _current.Code == CODE.SPACE)
+                                    GetNextToken();
+
+                                if (_current == null)
+                                {
+                                    state = ParserState.Accept;
+                                    break;
+                                }
+
+                                state = ParserState.ExpectIdentifier;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!foundStruct)
+                    {
+                       for (int j = 0; j < lastFragments; j++)
+                            GetNextToken();
+     
+
+                        if (_current == null)
+                        {
+                            state = ParserState.Accept;
+                            break;
+                        }
+                        state = ParserState.ExpectOpenCurlyBrace;
+                    }
+
                     break;
+
 
                 case ParserState.ExpectIdentifier:
                    
@@ -398,13 +578,54 @@ namespace Lab2
 
                     if (_current != null && _current.Code == CODE.IDENTIFIER)
                     {
+                       
+                        string firstIdentifier = _current.Value;
+                        Token firstToken = _current;
+
+                        
                         GetNextToken();
+
                        
                         while (_current != null && _current.Code == CODE.SPACE)
-                        {
                             GetNextToken();
+
+                        if (_current != null && _current.Code == CODE.IDENTIFIER)
+                        {
+                           
+                            int lookaheadPos = _pos;
+                            Token lookahead = null;
+
+                            while (lookaheadPos < _tokens.Count && _tokens[lookaheadPos].Code == CODE.SPACE)
+                                lookaheadPos++;
+
+                            if (lookaheadPos < _tokens.Count)
+                                lookahead = _tokens[lookaheadPos];
+
+                          
+                            if (lookahead != null && lookahead.Code == CODE.OPCURLYBRACE)
+                            {
+                                
+                                GetNextToken(); 
+
+                                while (_current != null && _current.Code == CODE.SPACE)
+                                    GetNextToken();
+
+                                state = ParserState.ExpectOpenCurlyBrace;
+                                return true;
+                            }
+                            else
+                            {
+                              
+                                state = ParserState.ExpectOpenCurlyBrace;
+                                return true;
+                            }
                         }
-                        state = ParserState.ExpectOpenCurlyBrace;
+                        else
+                        {
+                            
+                            state = ParserState.ExpectOpenCurlyBrace;
+                            return true;
+                        }
                     }
                     else if (_current != null && _current.Code == CODE.OPCURLYBRACE)
                     {
@@ -416,14 +637,11 @@ namespace Lab2
                     {
                         return false;
                     }
-                    break;
+                   
 
                 case ParserState.ExpectOpenCurlyBrace:
-             
                     while (_current != null && _current.Code == CODE.SPACE)
-                    {
                         GetNextToken();
-                    }
 
                     if (_current == null)
                     {
@@ -431,39 +649,63 @@ namespace Lab2
                         return true;
                     }
 
-                    if (_current.Code != CODE.OPCURLYBRACE)
+                    if (_current.Code == CODE.OPCURLYBRACE)
                     {
-                        
+                        GetNextToken();
+                        while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
                         state = ParserState.ExpectPublic;
                         return true;
                     }
-                    else
+
+                    
+                    if (_current.Code == CODE.PUBLIC)
                     {
-                        GetNextToken();
+                        state = ParserState.ExpectPublic;
+                        return true;
+                    }
+
+                 
+                    if (_current.Code == CODE.IDENTIFIER)
+                    {
                         
+                        GetNextToken();
                         while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
+
+                   
+                        if (_current != null && _current.Code == CODE.OPCURLYBRACE)
                         {
                             GetNextToken();
+                            while (_current != null && _current.Code == CODE.SPACE)
+                                GetNextToken();
+                            state = ParserState.ExpectPublic;
+                            return true;
                         }
+
                         state = ParserState.ExpectPublic;
+                        return true;
                     }
-                    break;
+
+                    state = ParserState.ExpectPublic;
+                    return true;
 
                 case ParserState.ExpectPublic:
                     while (_current != null && _current.Code == CODE.SPACE)
-                    {
                         GetNextToken();
-                    }
 
                     if (_current == null)
                     {
                         state = ParserState.Accept;
                         return true;
                     }
+
                     if (_current.Code == CODE.OPCURLYBRACE)
                     {
-                       
                         GetNextToken();
+                        while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
+                        state = ParserState.ExpectPublic;
                         return true;
                     }
 
@@ -482,34 +724,44 @@ namespace Lab2
                     if (_current.Code == CODE.TYPE_ID)
                     {
                         GetNextToken();
+                        while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
                         state = ParserState.ExpectSemicolonOrComma;
                         return true;
                     }
 
                     if (_current.Code == CODE.IDENTIFIER)
                     {
+                        
                         GetNextToken();
-                        state = ParserState.ExpectSemicolonOrComma;
+                        while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
+
+                       
+                        if (_current != null && _current.Code == CODE.TYPE_ID)
+                        {
+                            state = ParserState.ExpectType;
+                            return true;
+                        }
+
+                        state = ParserState.ExpectPublic;
                         return true;
                     }
 
                     if (_current.Code == CODE.END)
                     {
-                        
                         GetNextToken();
                         state = ParserState.ExpectPublic;
                         return true;
                     }
 
-                  
-                    while (_current != null && _current.Code != CODE.PUBLIC && _current.Code != CODE.THIS &&
-                           _current.Code != CODE.CLOSECURLYBRACE && _current.Code != CODE.TYPE_ID && _current.Code != CODE.IDENTIFIER)
+                    
+                    while (_current != null && _current.Code != CODE.PUBLIC && _current.Code != CODE.CLOSECURLYBRACE &&
+                           _current.Code != CODE.TYPE_ID && _current.Code != CODE.IDENTIFIER && _current.Code != CODE.OPCURLYBRACE)
                     {
                         GetNextToken();
                         while (_current != null && _current.Code == CODE.SPACE)
-                        {
                             GetNextToken();
-                        }
                     }
 
                     if (_current != null && _current.Code == CODE.PUBLIC)
@@ -519,67 +771,298 @@ namespace Lab2
                     else if (_current != null && _current.Code == CODE.TYPE_ID)
                     {
                         GetNextToken();
-                        state = ParserState.ExpectSemicolonOrComma;
+                        state = ParserState.ExpectFieldName;
                     }
                     else if (_current != null && _current.Code == CODE.IDENTIFIER)
                     {
                         GetNextToken();
-                        state = ParserState.ExpectSemicolonOrComma;
+                        state = ParserState.ExpectPublic;
+                    }
+                    else if (_current != null && _current.Code == CODE.OPCURLYBRACE)
+                    {
+                        GetNextToken();
+                        state = ParserState.ExpectPublic;
                     }
                     else
                         return false;
                     break;
 
                 case ParserState.ExpectType:
-                    SkipUntil(CODE.TYPE_ID, CODE.END, CODE.CLOSECURLYBRACE);
+                    SkipUntil(CODE.TYPE_ID, CODE.END, CODE.CLOSECURLYBRACE, CODE.IDENTIFIER, CODE.ERROR, CODE.PUBLIC);
+                    if (_current == null)
+                    {
+                        state = ParserState.Accept;
+                        return true;
+                    }
                     if (_current != null && _current.Code == CODE.TYPE_ID)
-                        state = ParserState.ExpectSemicolonOrComma;
+                    {
+                        GetNextToken();
+                        while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
+                        state = ParserState.ExpectFieldName;  
+                        return true;
+                    }
                     else if (_current != null && _current.Code == CODE.END)
-                        state = ParserState.ExpectSemicolon;
+                    {
+                        GetNextToken();
+                        while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
+                        state = ParserState.ExpectPublic;
+                        return true;
+                    }
                     else if (_current != null && _current.Code == CODE.CLOSECURLYBRACE)
+                    {
                         state = ParserState.ExpectCloseCurlyBrace;
+                        return true;
+                    }
+                    else if (_current != null && _current.Code == CODE.PUBLIC)
+                    {
+                        state = ParserState.ExpectPublic;
+                        return true;
+                    }
+                    else if (_current.Code == CODE.IDENTIFIER || _current.Code == CODE.ERROR)
+                    {
+                        string combined = "";
+                        List<Token> fragments = new List<Token>();
+                        int tempPos = _pos;
+                        int maxFragments = 5;
+
+                        for (int i = 0; i < maxFragments && tempPos + i < _tokens.Count; i++)
+                        {
+                            Token t = _tokens[tempPos + i];
+
+                            
+                            if (t.Code == CODE.SPACE)
+                                break;
+
+                           
+                            if (t.Code != CODE.IDENTIFIER && t.Code != CODE.ERROR)
+                                break;
+
+                            fragments.Add(t);
+                            combined += t.Value;
+
+                            
+                            string cleaned = new string(combined.Where(c => char.IsLetter(c)).ToArray());
+
+                           
+                            if (tempPos + i + 1 < _tokens.Count)
+                            {
+                                Token next = _tokens[tempPos + i + 1];
+
+                               
+                                if (next.Code == CODE.SPACE)
+                                {
+                                    break;
+                                }
+
+                                if (next.Code == CODE.END)
+                                {
+                                    break;
+                                }
+
+              
+                                if (next.Code == CODE.COMMA)
+                                {
+                                    break;
+                                }
+
+                               
+                                if (next.Code == CODE.PUBLIC)
+                                {
+                                    break;
+                                }
+
+                              
+                                if (next.Code == CODE.CLOSECURLYBRACE)
+                                {
+                                    break;
+                                }
+
+                           
+                                if (next.Code == CODE.TYPE_ID)
+                                {
+                                    break;
+                                }
+
+                        
+                                if (cleaned.Length >= 3 && cleaned.Length <= 6)
+                                {
+                                    if (cleaned.ToLower() == "string" || cleaned.ToLower() == "int" || cleaned.ToLower() == "float")
+                                    {
+                                       
+                                        if (next.Code == CODE.IDENTIFIER)
+                                        {
+                                
+                                            break;
+                                        }
+                                    }
+                                }
+
+                         
+                                if (cleaned.Length > 6 && next.Code == CODE.IDENTIFIER)
+                                {
+                                  
+                                    break;
+                                }
+                            }
+                        }
+
+                        string finalCleaned = new string(combined.Where(c => char.IsLetter(c)).ToArray());
+
+                       
+                        if (fragments.Count == 0)
+                        {
+                            GetNextToken();
+                            state = ParserState.ExpectSemicolonOrComma;
+                            return true;
+                        }
+
+                   
+                        if (finalCleaned.ToLower() == "string" || finalCleaned.ToLower() == "int" || finalCleaned.ToLower() == "float")
+                        {
+                           
+                            for (int j = 0; j < fragments.Count; j++)
+                                GetNextToken();
+
+                           
+                            while (_current != null && _current.Code == CODE.SPACE)
+                                GetNextToken();
+
+                            state = ParserState.ExpectFieldName;
+                            return true;
+                        }
+                        else
+                        {
+                          
+                            for (int j = 0; j < fragments.Count; j++)
+                                GetNextToken();
+
+                         
+                            while (_current != null && _current.Code == CODE.SPACE)
+                                GetNextToken();
+
+                            state = ParserState.ExpectFieldName;
+                            return true;
+                        }
+                    }
                     else
-                        return false;
+                    {
+                        state = ParserState.ExpectPublic;
+                        return true;
+                    }
                     break;
 
+                case ParserState.ExpectFieldName:
+                    while (_current != null && _current.Code == CODE.SPACE)
+                        GetNextToken();
+
+                    if (_current == null)
+                    {
+                        state = ParserState.Accept;
+                        return true;
+                    }
+
+                    if (_current.Code == CODE.IDENTIFIER)
+                    {
+                        GetNextToken();
+                        while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
+                        state = ParserState.ExpectSemicolonOrComma;
+                        return true;
+                    }
+                    else if (_current.Code == CODE.TYPE_ID)
+                    {
+                      
+                        state = ParserState.ExpectType;
+                        return true;
+                    }
+                    else if (_current.Code == CODE.END)
+                    {
+                       
+                        GetNextToken();
+                        while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
+                        state = ParserState.ExpectPublic;
+                        return true;
+                    }
+                    else if (_current.Code == CODE.CLOSECURLYBRACE)
+                    {
+                        state = ParserState.ExpectCloseCurlyBrace;
+                        return true;
+                    }
+                    else if (_current.Code == CODE.PUBLIC)
+                    {
+                        state = ParserState.ExpectPublic;
+                        return true;
+                    }
+                    else
+                    {
+                        GetNextToken();
+                        while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
+                        return true;
+                    }
                 case ParserState.ExpectSemicolonOrComma:
-                    while (_current != null && _current.Code != CODE.END && _current.Code != CODE.COMMA && _current.Code != CODE.CLOSECURLYBRACE)
+                    while (_current != null && _current.Code != CODE.END && _current.Code != CODE.COMMA &&
+                           _current.Code != CODE.CLOSECURLYBRACE && _current.Code != CODE.PUBLIC && _current.Code != CODE.TYPE_ID)
                     {
                         if (_current.Code == CODE.IDENTIFIER)
                         {
-                            AddError(_current.Value, GetPosition(_current), "Ожидается ';' или ','", "';' или ','", _current.Value);
+                            
                             GetNextToken();
                             while (_current != null && _current.Code == CODE.SPACE)
-                            {
                                 GetNextToken();
-                            }
                             continue;
                         }
                         GetNextToken();
                         while (_current != null && _current.Code == CODE.SPACE)
-                        {
                             GetNextToken();
-                        }
                     }
 
                     if (_current != null && _current.Code == CODE.END)
                     {
-                        GetNextToken();  
+                        GetNextToken();
+                        while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
                         state = ParserState.ExpectPublic;
+                        return true;
                     }
                     else if (_current != null && _current.Code == CODE.COMMA)
                     {
                         GetNextToken();
-                        state = ParserState.ExpectFieldName;
+                        while (_current != null && _current.Code == CODE.SPACE)
+                            GetNextToken();
+
+                        if (_current != null && (_current.Code == CODE.END || _current.Code == CODE.CLOSECURLYBRACE || _current.Code == CODE.PUBLIC))
+                        {
+                            
+                            state = ParserState.ExpectPublic;
+                            return true;
+                        }
+                        else
+                        {
+                            state = ParserState.ExpectFieldName;
+                            return true;
+                        }
                     }
                     else if (_current != null && _current.Code == CODE.CLOSECURLYBRACE)
                     {
                         state = ParserState.ExpectCloseCurlyBrace;
+                        return true;
                     }
+                    else if (_current != null && _current.Code == CODE.PUBLIC)
+                    {
+                        
+                        state = ParserState.ExpectPublic;
+                        return true;
+                    }
+                  
                     else
-                        return false;
-                    break;
-
+                    {
+                        state = ParserState.ExpectPublic;
+                        return true;
+                    }
 
                 case ParserState.ExpectSemicolon:
                     SkipUntil(CODE.END, CODE.CLOSECURLYBRACE);
@@ -590,6 +1073,7 @@ namespace Lab2
                     else
                         return false;
                     break;
+
 
                 case ParserState.ExpectCloseCurlyBrace:
                     SkipUntil(CODE.CLOSECURLYBRACE);
@@ -627,7 +1111,7 @@ namespace Lab2
             {
                 if (_current.Code == CODE.ERROR)
                 {
-                    AddError(_current.Value, GetPosition(_current), _current.ErrorMessage ?? "Неизвестный символ", "допустимый символ", _current.Value);
+                    
                     GetNextToken();
                     continue;
                 }
@@ -707,12 +1191,10 @@ namespace Lab2
                     case "12":
                         code = CODE.ERROR;
                         isError = true;
-                        errorMessage = $"Неизвестный символ: '{lex.Value}'";
                         break;
                     default:
                         code = CODE.ERROR;
                         isError = true;
-                        errorMessage = $"Неизвестный символ: '{lex.Value}'";
                         break;
                 }
 
